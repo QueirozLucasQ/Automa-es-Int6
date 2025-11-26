@@ -2,7 +2,7 @@
 
 Este repositório contém scripts (Userscripts) para **Tampermonkey** desenvolvidos para turbinar a produtividade no sistema Integrator6.
 
-Foco total em agilidade: altere status com um clique, padronize comentários e extraia dados de teste automaticamente. ⚡
+Foco total em agilidade: altere status com um clique e padronize comentários. ⚡
 
 ![Preview do Painel](https://github.com/user-attachments/assets/323eb261-9159-47d3-80ae-314e3dda75c9)
 
