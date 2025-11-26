@@ -1,4 +1,4 @@
-# 🚀 Integrator6 PowerTools: Suíte de Automação
+# 🚀 Integrator6 PowerTools
 
 Este repositório contém scripts (Userscripts) para **Tampermonkey** desenvolvidos para turbinar a produtividade no sistema Integrator6.
 
