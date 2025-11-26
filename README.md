@@ -3,7 +3,7 @@
 1. Instale a extensão [Tampermonkey](https://www.tampermonkey.net/) no seu navegador.
 2. Clique no botão abaixo para instalar diretamente:
 
-👉 **[Instalar Script]()**
+👉 **[Instalar Script](https://raw.githubusercontent.com/QueirozLucasQ/Automa-es-Int6/refs/heads/main/menu_completo.js)**
 
 
 ---
