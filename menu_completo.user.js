@@ -11,7 +11,7 @@
 (function() {
     'use strict';
 
-    // --- CONFIGURAÇÃO ---
+    // --- Minhas Configurações ---
     const BOTOES_STATUS = [
         {label: "Em Analise", cor: "#ffc107", texto: "#000000"},
         {label: "Pendente", cor: "#8e44ad", texto: "#ffffff"},
@@ -29,11 +29,9 @@
             tipoDropdown: "Comentário Padrão",
             mensagem: "Em tratativa."
         }
-        // Nota: O botão de "Teste" eu mantive no script separado (botão vermelho flutuante)
-        // Se quiser ele aqui dentro também, me avise que eu adiciono.
     ];
 
-    // --- ESTILOS ---
+    // --- Estilos CSS ---
     const ESTILO_CSS = `
         #painel-botoes-status {
             padding: 10px 0; margin: 10px 0 15px 0; display: flex; gap: 5px;
@@ -55,14 +53,12 @@
 
     setInterval(verificarEInjetarBotoes, 1000);
 
-    // --- INJEÇÃO DO PAINEL ---
+    // --- Lógica de Injeção ---
     function verificarEInjetarBotoes() {
-        // 1. Se já existe, sai.
         if (document.getElementById('painel-botoes-status')) return;
 
-        // 2. TRAVA DE SEGURANÇA (NOVO):
-        // Só injeta se encontrar as abas específicas de um atendimento ("Dados", "Histórico", etc)
-        // A tela de pesquisa NÃO tem essas classes/abas.
+        // Trava de Segurança: Só injeto o painel se encontrar abas de atendimento
+        // Isso evita bugs na tela de pesquisa
         const abas = document.querySelectorAll('.ui-tabview-title, li[role="presentation"] a');
         let ehTelaAtendimento = false;
 
@@ -74,12 +70,13 @@
             }
         }
 
-        if (!ehTelaAtendimento) return; // Se não achou as abas, não faz nada.
+        if (!ehTelaAtendimento) return;
 
-        // 3. Procura o local de inserção
+        // Insiro o painel logo acima do label "Protocolo"
         const labelProtocolo = encontrarLabelPorTexto('Protocolo');
         if (labelProtocolo) {
             let containerAlvo = labelProtocolo.closest('.ui-grid-row') || labelProtocolo.closest('.row') || labelProtocolo.parentElement.parentElement;
+            
             if (containerAlvo && containerAlvo.parentElement.classList.contains('ui-panel-content')) {
                  containerAlvo = containerAlvo.parentElement;
             }
@@ -89,6 +86,7 @@
 
     function criarPainel(localInsercao) {
         if(document.getElementById('painel-botoes-status')) return;
+        
         const divContainer = document.createElement('div');
         divContainer.id = 'painel-botoes-status';
 
@@ -114,7 +112,7 @@
     function criarTitulo(t) { const s=document.createElement('span'); s.className='titulo-painel'; s.innerText=t; return s; }
     function criarBotaoBase(c) { const b=document.createElement('button'); b.innerText=c.label; b.className='btn-status-rapido'; b.style.backgroundColor=c.cor; b.style.color=c.texto; return b; }
 
-    // --- MACROS ---
+    // --- Macro de Comentário ---
     async function executingMacro(botao, config) {
         const txtOrig = botao.innerText;
         const corOrig = botao.style.backgroundColor;
@@ -123,7 +121,6 @@
         botao.classList.add('processando');
 
         try {
-            // Abrir Menu e Janela
             const btnAdd = encontrarElementoPorTexto('span, button', 'Adicionar');
             if(!btnAdd) throw new Error("Botão Adicionar sumiu");
             btnAdd.click();
@@ -136,10 +133,12 @@
             botao.innerText = "⏳ Janela...";
             await esperar(800);
 
-            // Selecionar Dropdown (Método HTML Select)
+            // O Pulo do Gato: Busco direto o <select> no HTML e forço o valor
+            // Ignoro o componente visual do PrimeNG que é difícil de clicar
             if (config.tipo === "COMENTARIO") {
-                const selects = document.querySelectorAll('select.form-control'); // Busca global
+                const selects = document.querySelectorAll('select.form-control');
                 let selectAlvo = null;
+                
                 for (let sel of selects) {
                     for (let op of sel.options) {
                         if (op.text.trim() === config.tipoDropdown) {
@@ -159,7 +158,6 @@
             }
             await esperar(300);
 
-            // Digitar
             const textarea = document.querySelector('textarea.form-control') || document.querySelector('.ui-dialog textarea');
             if(textarea) {
                 textarea.value = config.mensagem;
@@ -167,12 +165,12 @@
                 textarea.dispatchEvent(new Event('change', { bubbles: true }));
             }
 
-            // Salvar
             botao.innerText = "⏳ Salvando...";
             await esperar(500);
 
             const btnsSalvar = document.querySelectorAll('button');
             let clicou = false;
+            
             for (let btn of btnsSalvar) {
                 if ((btn.textContent.includes('SALVAR') || btn.textContent.includes('Salvar')) && !btn.disabled) {
                     if(btn.offsetParent !== null) {
@@ -204,9 +202,11 @@
         }, 2000);
     }
 
-    // --- STATUS ---
+    // --- Mudança de Status ---
     function executingStatus(alvo, btn) {
         const txt = btn.innerText; btn.innerText = "⏳";
+        
+        // Simulo a navegação do mouse: Mudar -> Status -> Opção
         const btnMudar = encontrarElementoPorTexto('span, button, a', 'Mudar');
         if(btnMudar) {
             btnMudar.click();
@@ -224,9 +224,20 @@
         } else resetBtn(btn, txt);
     }
 
+    // --- Helpers ---
     function resetBtn(b, t) { setTimeout(() => b.innerText = t, 500); }
     function esperar(ms) { return new Promise(r => setTimeout(r, ms)); }
-    function encontrarElementoPorTexto(sel, txt) { for (let el of document.querySelectorAll(sel)) if (el.textContent.trim() === txt) return el; return null; }
-    function encontrarLabelPorTexto(txt) { for (let l of document.querySelectorAll('label')) if (l.textContent.includes(txt)) return l; return null; }
+    
+    function encontrarElementoPorTexto(sel, txt) { 
+        for (let el of document.querySelectorAll(sel)) 
+            if (el.textContent.trim() === txt) return el; 
+        return null; 
+    }
+    
+    function encontrarLabelPorTexto(txt) { 
+        for (let l of document.querySelectorAll('label')) 
+            if (l.textContent.includes(txt)) return l; 
+        return null; 
+    }
 
 })();
